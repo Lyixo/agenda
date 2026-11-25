@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agenda Máster DOP</title>
+<meta name="description" content="Exámenes, entregas y clases de la clase, actualizado por el delegado.">
+<meta name="theme-color" content="#0f5c6e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f5c6e'/%3E%3Crect x='14' y='18' width='36' height='32' rx='5' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M14 28h36M24 12v10M40 12v10' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Agenda de la clase. Die Termine kommen aus termine.json, die der Delegado über „Publicar para la clase“ aktualisiert. */
+:root {
+  --bg: #f3f5f7; --card: #ffffff; --ink: #14202b; --mut: #5b6b7a; --faint: #7d8c99; --line: #dde3e9;
+  --accent: #0f5c6e; --accent-bg: #e1f0f3;
+  --exam: #b4232f; --exam-bg: #fbe9ea; --due: #8a5200; --due-bg: #fdf1dc; --class: #1f5fae; --class-bg: #e5eefa; --opt: #5b6b7a; --opt-bg: #eef1f4;
+  --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #0e1418; --card: #162027; --ink: #e8eef2; --mut: #9fb0bd; --faint: #7f92a1; --line: #26333d;
+  --accent: #6cc3d5; --accent-bg: #15313a;
+  --exam: #ff8a92; --exam-bg: #3a1a1e; --due: #f2b95c; --due-bg: #33270f; --class: #8bb6ef; --class-bg: #172a43; --opt: #9fb0bd; --opt-bg: #1d2830; color-scheme: dark } }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)); }
+main { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-size: 26px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--mut); }
+.top { display: flex; flex-direction: column; gap: 6px; }
+.eyebrow { font-size: 12px; color: var(--mut); }
+.stamp { font-size: 13px; color: var(--mut); }
+.stamp.old { color: var(--due); font-weight: 500; }
+.msg { background: var(--accent-bg); color: var(--ink); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.msg b { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+.msg p { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+.hero { background: var(--exam-bg); border-radius: 14px; padding: 16px 18px; display: flex; gap: 16px; align-items: center; }
+.count { font-family: var(--display); font-weight: 700; font-size: 44px; line-height: 1; color: var(--exam); font-variant-numeric: tabular-nums; min-width: 2ch; text-align: center; }
+.count small { display: block; font-family: var(--body); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px; }
+.hero .what { min-width: 0; }
+.hero .what b { display: block; font-size: 16px; }
+.hero .what span { color: var(--mut); font-size: 13px; }
+.strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.dayc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 6px 2px 8px; text-align: center; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.dayc .wd { font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.05em; }
+.dayc .dn { font-family: var(--display); font-weight: 500; font-size: 17px; font-variant-numeric: tabular-nums; }
+.dayc.today { border-color: var(--accent); background: var(--accent-bg); }
+.dayc.past { opacity: 0.45; }
+.dots { display: flex; gap: 3px; min-height: 7px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button { font: 500 13px var(--body); color: var(--mut); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.filters button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.group { display: flex; flex-direction: column; gap: 8px; }
+ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.item { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; }
+.date { text-align: center; border-right: 1px solid var(--line); padding-right: 10px; }
+.date .wd { font-size: 11px; text-transform: uppercase; color: var(--faint); letter-spacing: 0.05em; }
+.date .dn { font-family: var(--display); font-size: 20px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.date .mo { font-size: 11px; color: var(--mut); }
+.body { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.tag { align-self: flex-start; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; }
+.t-exam { background: var(--exam-bg); color: var(--exam); } .t-due { background: var(--due-bg); color: var(--due); }
+.t-class { background: var(--class-bg); color: var(--class); } .t-opt { background: var(--opt-bg); color: var(--opt); }
+.title { font-weight: 600; overflow-wrap: anywhere; }
+.meta { font-size: 13px; color: var(--mut); overflow-wrap: anywhere; }
+.acts { display: flex; gap: 6px 14px; flex-wrap: wrap; margin-top: 2px; }
+.acts a { font-size: 13px; font-weight: 500; color: var(--accent); text-decoration: none; }
+.acts a:hover { text-decoration: underline; }
+.note { font-size: 12px; color: var(--faint); }
+.done-box { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ink); cursor: pointer; margin-top: 2px; align-self: flex-start; }
+.done-box input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+.item.done { opacity: .55; }
+.item.done .title { text-decoration: line-through; text-decoration-thickness: 1px; }
+.todo { font-size: 13px; color: var(--mut); }
+.todo b { color: var(--ink); }
+.hint { font-size: 12px; color: var(--faint); }
+.avisos li { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+footer { font-size: 12px; color: var(--faint); border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 4px; }
+.empty { color: var(--mut); font-size: 14px; padding: 8px 2px; margin: 0; }
+@media (max-width: 380px) { .count { font-size: 36px; } h1 { font-size: 22px; } }
+@media (prefers-reduced-motion: no-preference) { .filters button { transition: background .15s, color .15s; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div class="eyebrow" id="program">Máster en Dirección y Organización de Proyectos</div>
+    <h1>Agenda de la clase</h1>
+    <div class="stamp" id="stamp">Cargando…</div>
+  </header>
+
+  <section class="msg" id="msg" hidden><b>Aviso del delegado</b><p id="msgText"></p></section>
+
+  <section class="hero" id="hero" hidden aria-live="polite"></section>
+
+  <section class="group" aria-label="Esta semana de un vistazo">
+    <h2 id="stripTitle">Esta semana</h2>
+    <div class="strip" id="strip"></div>
+    <div class="todo" id="todo"></div>
+  </section>
+
+  <div class="filters" role="group" aria-label="Filtrar">
+    <button id="f-all" data-f="all" aria-pressed="true">Todo</button>
+    <button id="f-exam" data-f="exam" aria-pressed="false">Exámenes</button>
+    <button id="f-due" data-f="due" aria-pressed="false">Entregas</button>
+    <button id="f-class" data-f="class" aria-pressed="false">Clases y sesiones</button>
+  </div>
+
+  <div id="list" class="group" style="gap:18px"></div>
+
+  <section class="group avisos" id="avisos" hidden>
+    <h2>Avisos de los profesores</h2>
+    <ul id="avisosList"></ul>
+  </section>
+
+  <footer>
+    <span>Fuente: calendario, anuncios y documentos del Campus Virtual Nebrija. Sin notas ni datos personales.</span>
+    <span>Los enlaces llevan al Campus: hay que iniciar sesión. Si algo no cuadra, escribe al delegado.</span>
+    <span>«Ya lo entregué» solo se guarda en este navegador; nadie más lo ve. Para estar seguro, «Ver mi entrega» abre la tarea en el Campus con tu estado real.</span>
+  </footer>
+</main>
+
+<script>
+const OUT = 'https://campusvirtual.nebrija.es/ultra/courses/';
+const KIND = { exam: ['Examen', 't-exam', 'var(--exam)'], due: ['Entrega', 't-due', 'var(--due)'], class: ['Clase', 't-class', 'var(--class)'], opt: ['Opcional', 't-opt', 'var(--opt)'] };
+const TZ = 'Europe/Madrid', LOC = 'es-ES', DAY = 864e5;
+const $ = (id) => document.getElementById(id);
+const fmt = (t, o) => new Intl.DateTimeFormat(LOC, Object.assign({ timeZone: TZ }, o)).format(t);
+const hm = (t) => fmt(t, { hour: '2-digit', minute: '2-digit' });
+/* Kalendertag in Madrid als "JJJJ-MM-TT" */
+const dayKey = (t) => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(t).map((x) => [x.type, x.value])); return p.year + '-' + p.month + '-' + p.day; };
+const dayNum = (k) => Date.parse(k + 'T12:00:00Z') / DAY;
+const el = (tag, attrs, ...kids) => { const n = document.createElement(tag); for (const k in attrs || {}) { if (k === 'class') n.className = attrs[k]; else n.setAttribute(k, attrs[k]); } for (const c of kids.flat()) if (c != null && c !== false) n.append(c); return n; };
+
+let DATA = null, ITEMS = [];
+/* Eigene Häkchen „Ya lo entregué“: nur in diesem Browser. */
+let DONE = {};
+try { DONE = JSON.parse(localStorage.getItem('agenda.done') || '{}') || {}; } catch (e) {}
+const idOf = (x) => (x.courseId || '') + '|' + x.title + '|' + x.start;
+const isDone = (x) => !!DONE[idOf(x)];
+const setDone = (x, on) => { if (on) DONE[idOf(x)] = Date.now(); else delete DONE[idOf(x)]; try { localStorage.setItem('agenda.done', JSON.stringify(DONE)); } catch (e) {} render(); };
+let filter = 'all';
+try { filter = localStorage.getItem('agenda.filter') || 'all'; } catch (e) {}
+
+const gcal = (x) => {
+  const z = (t) => new Date(t).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const s = x.end ? x.t : x.t - 30 * 6e4;
+  const p = new URLSearchParams({ action: 'TEMPLATE', text: KIND[x.kind][0] + ': ' + x.title + (x.course ? ' · ' + x.course : ''), dates: z(s) + '/' + z(x.e), details: 'Agenda de la clase · ' + location.href, ctz: TZ });
+  return 'https://calendar.google.com/calendar/render?' + p.toString();
+};
+
+function render() {
+  const now = Date.now();
+  const todayK = dayKey(now), today = dayNum(todayK);
+  const up = ITEMS.filter((x) => x.e >= now).sort((a, b) => a.t - b.t);
+
+  /* Stand */
+  const upd = DATA && Date.parse(DATA.updated);
+  if (upd) {
+    const age = now - upd;
+    $('stamp').textContent = 'Actualizado el ' + fmt(upd, { day: 'numeric', month: 'short' }) + ' a las ' + hm(upd) + (DATA.by ? ' por ' + DATA.by : '') + (age > 7 * DAY ? ' · puede estar desactualizada' : '');
+    $('stamp').classList.toggle('old', age > 7 * DAY);
+  }
+
+  /* Countdown: nächstes Examen */
+  const ex = up.find((x) => x.kind === 'exam');
+  const hero = $('hero'); hero.replaceChildren(); hero.hidden = !ex;
+  if (ex) {
+    const days = Math.max(0, Math.round(dayNum(dayKey(ex.t)) - today));
+    hero.append(el('div', { class: 'count' }, days === 0 ? 'Hoy' : String(days), days === 0 ? null : el('small', {}, days === 1 ? 'día' : 'días')),
+      el('div', { class: 'what' }, el('b', {}, 'Próximo examen: ' + (ex.course || ex.title)), el('span', {}, ex.title + ' · ' + fmt(ex.t, { weekday: 'long', day: 'numeric', month: 'long' }) + ' · ' + hm(ex.t))));
+  }
+
+  /* Wochenleiste Mo–So */
+  const wd = (new Date(todayK + 'T12:00:00Z').getUTCDay() + 6) % 7;
+  const mon = Date.parse(todayK + 'T12:00:00Z') - wd * DAY;
+  const strip = $('strip'); strip.replaceChildren();
+  for (let i = 0; i < 7; i++) {
+    const t = mon + i * DAY, k = dayKey(t);
+    const its = ITEMS.filter((x) => dayKey(x.t) === k);
+    strip.append(el('div', { class: 'dayc' + (k === todayK ? ' today' : '') + (i < wd ? ' past' : ''), title: its.map((x) => x.title).join(' · ') },
+      el('span', { class: 'wd' }, fmt(t, { weekday: 'short' }).replace('.', '')), el('span', { class: 'dn' }, fmt(t, { day: 'numeric' })),
+      el('span', { class: 'dots' }, its.filter((x) => !isDone(x)).map((x) => el('i', { class: 'dot', style: 'background:' + KIND[x.kind][2] })))));
+  }
+  $('stripTitle').textContent = 'Esta semana · ' + fmt(mon, { day: 'numeric', month: 'short' }) + ' – ' + fmt(mon + 6 * DAY, { day: 'numeric', month: 'short' });
+  const weekDue = up.filter((x) => x.kind === 'due' && dayNum(dayKey(x.t)) - dayNum(dayKey(mon)) < 7);
+  const open = weekDue.filter((x) => !isDone(x)).length;
+  $('todo').replaceChildren(...(weekDue.length ? [open ? el('b', {}, open === 1 ? '1 entrega pendiente' : open + ' entregas pendientes') : el('b', {}, '✓ Todas las entregas de la semana marcadas'), open ? ' esta semana' + (weekDue.length > open ? ' · ' + (weekDue.length - open) + ' marcada' + (weekDue.length - open > 1 ? 's' : '') + ' como entregada' + (weekDue.length - open > 1 ? 's' : '') : '') : ''] : []));
+
+  /* Liste nach Wochen */
+  const shown = up.filter((x) => filter === 'all' || x.kind === filter || (filter === 'class' && x.kind === 'opt'));
+  const monDay = dayNum(dayKey(mon));
+  const groups = [['Esta semana', 0, 7], ['La semana que viene', 7, 14], ['Más adelante', 14, Infinity]];
+  const list = $('list'); list.replaceChildren();
+  let any = false;
+  for (const [name, a, b] of groups) {
+    const its = shown.filter((x) => { const d = dayNum(dayKey(x.t)) - monDay; return d >= a && d < b; });
+    if (!its.length) continue; any = true;
+    list.append(el('section', { class: 'group' }, el('h2', {}, name), el('ul', {}, its.map((x) => {
+      const [label, cls] = KIND[x.kind];
+      const when = x.allDay ? 'Todo el día' : x.kind === 'due' ? 'Hasta las ' + hm(x.t) : x.end ? hm(x.t) + '–' + hm(x.e) : hm(x.t);
+      const canTick = x.kind === 'due';
+      const done = canTick && isDone(x);
+      const cb = canTick ? el('input', { type: 'checkbox', id: 'done-' + btoa(unescape(encodeURIComponent(idOf(x)))).replace(/[^a-z0-9]/gi, '').slice(-24) }) : null;
+      if (cb) { cb.checked = done; cb.addEventListener('change', () => setDone(x, cb.checked)); }
+      return el('li', { class: 'item' + (done ? ' done' : '') },
+        el('div', { class: 'date' }, el('div', { class: 'wd' }, fmt(x.t, { weekday: 'short' }).replace('.', '')), el('div', { class: 'dn' }, fmt(x.t, { day: 'numeric' })), el('div', { class: 'mo' }, fmt(x.t, { month: 'short' }).replace('.', ''))),
+        el('div', { class: 'body' },
+          el('span', { class: 'tag ' + cls }, label),
+          el('span', { class: 'title' }, x.title),
+          el('span', { class: 'meta' }, (x.course ? x.course + ' · ' : '') + when),
+          x.note ? el('span', { class: 'note' }, x.note) : null,
+          cb ? el('label', { class: 'done-box', for: cb.id }, cb, 'Ya lo entregué') : null,
+          el('div', { class: 'acts' },
+            /^https:\/\/campusvirtual\.nebrija\.es\//.test(x.task || '') ? el('a', { href: x.task, target: '_blank', rel: 'noopener' }, 'Ver mi entrega en el Campus')
+              : /^_\d+_\d+$/.test(x.courseId || '') ? el('a', { href: OUT + x.courseId + '/outline', target: '_blank', rel: 'noopener' }, 'Abrir en el Campus') : null,
+            el('a', { href: gcal(x), target: '_blank', rel: 'noopener' }, 'Añadir a Google Calendar'))));
+    }))));
+  }
+  if (!any) list.append(el('p', { class: 'empty' }, DATA ? 'No hay nada pendiente con este filtro.' : ''));
+  for (const btn of document.querySelectorAll('.filters button')) btn.setAttribute('aria-pressed', String(btn.dataset.f === filter));
+}
+
+function show(data) {
+  DATA = data;
+  if (data.program) $('program').textContent = data.program;
+  ITEMS = (data.items || []).filter((x) => KIND[x.kind] && Date.parse(x.start)).map((x) => Object.assign({}, x, { t: Date.parse(x.start), e: Date.parse(x.end || x.start) }));
+  const m = String(data.message || '').trim();
+  $('msg').hidden = !m; $('msgText').textContent = m;
+  const av = data.avisos || [];
+  $('avisos').hidden = !av.length;
+  $('avisosList').replaceChildren(...av.map((a) => el('li', {}, el('span', { class: 'title' }, a.title), el('span', { class: 'meta' }, (a.course || '') + (a.date ? ' · ' + fmt(Date.parse(a.date), { day: 'numeric', month: 'short' }) : '') + (a.text ? ' · ' + a.text : '')))));
+  render();
+}
+
+async function load() {
+  try {
+    const r = await fetch('termine.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    show(await r.json());
+  } catch (e) {
+    if (!DATA) { $('stamp').textContent = 'No se pudo cargar la agenda. Comprueba la conexión y recarga la página.'; $('stamp').classList.add('old'); render(); }
+  }
+}
+
+for (const btn of document.querySelectorAll('.filters button')) btn.addEventListener('click', () => {
+  filter = btn.dataset.f; try { localStorage.setItem('agenda.filter', filter); } catch (e) {} render();
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') load(); });
+load();
+setInterval(render, 5 * 60e3);
+</script>
+</body>
+</html>
