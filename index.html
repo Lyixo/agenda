@@ -122,10 +122,22 @@ details.gen[open] > summary::before { transform: rotate(90deg); }
 .dtitle i { flex: none; width: 10px; height: 10px; border-radius: 50%; }
 .dtitle h2 { margin: 0; font-size: 17px; line-height: 1.3; }
 .link { background: none; border: 0; padding: 0; color: var(--acc); font-size: 13px; font-weight: 600; }
+.mine { flex: none; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.picker { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-top: 14px; }
+.picker h2 { font-size: 15px; margin: 0; }
+.picker ul { display: grid; gap: 2px; margin: 8px 0; }
+.picker li + li { border-top: 0; }
+.pick { display: flex; align-items: center; gap: 10px; padding: 7px 4px; border-radius: 8px; cursor: pointer; }
+.pick:hover { background: var(--hover); }
+.pick i { flex: 0 0 10px; height: 10px; border-radius: 50%; }
+.pick span { flex: 1; min-width: 0; }
+.pick .tag { flex: none; font-size: 11px; color: var(--mut); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+.hiddennote { font-size: 12.5px; color: var(--mut); margin: -6px 0 10px; }
+.hiddennote button { margin-left: 4px; }
 .link:hover { background: none; text-decoration: underline; }
 footer { display: grid; gap: 4px; color: var(--faint); font-size: 12px; border-top: 1px solid var(--line); margin-top: 18px; padding-top: 12px; }
 @media (max-width: 640px) {
-  header { padding: 14px 14px 4px; } .scroll { padding: 0 14px 14px; }
+  header { padding: 14px 14px 4px; flex-direction: column; gap: 8px; } .scroll { padding: 0 14px 14px; }
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tab { padding: 8px 9px; }
   .row { gap: 9px; } .when { flex-basis: 52px; }
@@ -146,8 +158,10 @@ footer { display: grid; gap: 4px; color: var(--faint); font-size: 12px; border-t
       <div class="sub" id="program">Máster en Dirección y Organización de Proyectos</div>
       <div class="sub" id="stamp">Cargando…</div>
     </div>
+    <button class="mine" id="mineBtn" type="button" aria-expanded="false" aria-controls="picker">Mis asignaturas</button>
   </header>
   <div class="scroll">
+    <section class="picker" id="picker" hidden></section>
     <section class="banner" id="msg" hidden><b>Aviso del delegado</b><p id="msgText"></p></section>
     <div class="tiles" id="tiles"></div>
     <nav class="nav" id="tabs" aria-label="Vistas"></nav>
@@ -184,8 +198,13 @@ const dayNum = (t) => Math.floor(Date.parse(dayKey(t) + 'T00:00:00Z') / DAY);
 const noon = (n) => n * DAY + DAY / 2;  /* Tagesnummer → 12:00 UTC desselben Tages, liegt in Madrid sicher im selben Kalendertag */
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
-let DATA = null, ITEMS = [], COURSES = [];
-const ui = { tab: 'semana', calMonth: null, calSel: null, course: null };
+let DATA = null, ALL = [], ITEMS = [], COURSES = [];
+/* „Mis asignaturas“: welche Fächer dieser Browser zeigt. Optionale Kurse (nur „Opcional“-Termine, z. B. SCRUM) sind aus, bis man sie einschaltet. */
+let MINE = {};
+try { MINE = JSON.parse(localStorage.getItem('agenda.courses') || '{}') || {}; } catch (e) {}
+const shownCourse = (name) => { if (!name) return true; const c = COURSES.find((k) => k.name === name); const v = MINE[name]; return v === undefined ? !(c && c.optional) : !!v; };
+const setMine = (name, on) => { MINE[name] = on; try { localStorage.setItem('agenda.courses', JSON.stringify(MINE)); } catch (e) {} render(); };
+const ui = { tab: 'semana', calMonth: null, calSel: null, course: null, picker: false };
 let DONE = {};
 try { DONE = JSON.parse(localStorage.getItem('agenda.done') || '{}') || {}; } catch (e) {}
 const idOf = (x) => (x.courseId || '') + '|' + x.title + '|' + x.start;
@@ -311,8 +330,9 @@ function coursesView() {
       past.length ? h('details', { class: 'gen' }, h('summary', {}, 'Pasado (' + past.length + ')'), h('ul', {}, past.map((x) => row(x, { noCourse: true })))) : null
     ];
   }
-  if (!COURSES.length) return h('div', { class: 'empty' }, 'Todavía no hay asignaturas publicadas.');
-  return [h('div', { class: 'cgrid' }, COURSES.map((c) => {
+  const mine = COURSES.filter((c) => shownCourse(c.name));
+  if (!mine.length) return h('div', { class: 'empty' }, COURSES.length ? 'No has elegido ninguna asignatura. Usa «Mis asignaturas» arriba.' : 'Todavía no hay asignaturas publicadas.');
+  return [h('div', { class: 'cgrid' }, mine.map((c) => {
     const list = ITEMS.filter((x) => x.course === c.name && x.e >= now);
     const exam = list.find((x) => x.kind === 'exam'), next = list.find((x) => x.kind !== 'opt') || list[0];
     const dues = list.filter((x) => x.kind === 'due'), open = dues.filter((x) => !isDone(x)).length;
@@ -328,7 +348,7 @@ function coursesView() {
 
 /* ---------- Avisos ---------- */
 function avisosView() {
-  const av = (DATA && DATA.avisos) || [];
+  const av = ((DATA && DATA.avisos) || []).filter((a) => shownCourse(a.course));
   const m = String((DATA && DATA.message) || '').trim();
   return [
     m ? [h('div', { class: 'group' }, 'Del delegado'), h('div', { class: 'banner', style: 'margin-top:4px' }, h('p', {}, m))] : null,
@@ -342,6 +362,26 @@ function avisosView() {
 
 const VIEWS = { semana: weekView, calendario: calendarView, asignaturas: coursesView, avisos: avisosView };
 
+function pickerView() {
+  return [
+    h('h2', { id: 'pickerTitle' }, 'Mis asignaturas'),
+    h('div', { class: 'hint', style: 'padding-bottom:0' }, 'Marca las asignaturas que tienes. Las demás desaparecen de la semana, el calendario y los avisos. Solo se guarda en este navegador.'),
+    h('ul', { 'aria-labelledby': 'pickerTitle' }, COURSES.map((c) => {
+      const cb = h('input', { type: 'checkbox', class: 'chk' });
+      cb.checked = shownCourse(c.name);
+      cb.addEventListener('change', () => setMine(c.name, cb.checked));
+      return h('li', {}, h('label', { class: 'pick' }, cb, h('i', { style: 'background:' + c.color }), h('span', {}, c.name), c.optional ? h('span', { class: 'tag' }, 'opcional') : null));
+    })),
+    h('button', { type: 'button', onclick: () => { ui.picker = false; render(); } }, 'Listo')
+  ];
+}
+const hiddenNote = () => {
+  const hid = COURSES.filter((c) => !shownCourse(c.name));
+  if (!hid.length) return null;
+  return h('div', { class: 'hiddennote' }, 'Ocultas: ' + hid.map((c) => c.name + (c.optional && MINE[c.name] === undefined ? ' (opcional)' : '')).join(', ') + ' ·',
+    h('button', { class: 'link', type: 'button', onclick: () => { ui.picker = true; render(); window.scrollTo(0, 0); } }, 'Cambiar'));
+};
+
 function tiles() {
   const now = Date.now(), today = dayNum(now), wd = (new Date(noon(today)).getUTCDay() + 6) % 7, mon = today - wd;
   const ex = ITEMS.find((x) => x.kind === 'exam' && x.e >= now);
@@ -354,13 +394,19 @@ function tiles() {
     tile(ex ? (exDays === 0 ? 'Hoy' : exDays) : '—', ex ? (exDays === 1 ? 'día hasta el examen' : exDays === 0 ? 'examen' : 'días hasta el examen') : 'Sin examen próximo', ex ? ex.course : '', ex && exDays <= 7, () => { if (ex) { ui.tab = 'calendario'; ui.calSel = dayNum(ex.t); const [yy, mm] = dayKey(ex.t).split('-').map(Number); ui.calMonth = [yy, mm]; go(); } }),
     tile(openDue.length, openDue.length === 1 ? 'entrega pendiente esta semana' : 'entregas pendientes esta semana', openDue[0] ? 'Próxima: ' + rel(openDue[0].t) : dueWeek.length ? '✓ todo marcado' : '', openDue.some((x) => urg(x) === 'bad'), () => { ui.tab = 'semana'; go(); }),
     tile(nextClass ? fmt(nextClass.t, { day: 'numeric', month: 'short' }) : '—', 'Próxima clase', nextClass ? hm(nextClass.t) + ' · ' + nextClass.course : '', false, () => { ui.tab = 'semana'; go(); }),
-    tile(((DATA && DATA.avisos) || []).length, 'Avisos recientes', '', false, () => { ui.tab = 'avisos'; go(); })
+    tile(((DATA && DATA.avisos) || []).filter((a) => shownCourse(a.course)).length, 'Avisos recientes', '', false, () => { ui.tab = 'avisos'; go(); })
   ];
 }
 const go = () => { if (location.hash !== '#' + ui.tab) history.replaceState(null, '', '#' + ui.tab); render(); };
 
 function render() {
   const now = Date.now();
+  ITEMS = ALL.filter((x) => shownCourse(x.course));
+  const shownN = COURSES.filter((c) => shownCourse(c.name)).length;
+  $('mineBtn').textContent = 'Mis asignaturas' + (COURSES.length ? ' (' + shownN + '/' + COURSES.length + ')' : '');
+  $('mineBtn').setAttribute('aria-expanded', String(ui.picker));
+  $('picker').hidden = !ui.picker;
+  if (ui.picker) $('picker').replaceChildren(...pickerView().flat(Infinity).filter(Boolean));
   const upd = DATA && Date.parse(DATA.updated);
   if (upd) {
     const old = now - upd > 7 * DAY;
@@ -370,19 +416,23 @@ function render() {
   const m = String((DATA && DATA.message) || '').trim();
   $('msg').hidden = !m; $('msgText').textContent = m;
   $('tiles').replaceChildren(...(DATA ? tiles() : []));
-  const counts = { semana: ITEMS.filter((x) => x.kind === 'due' && x.e >= now && !isDone(x) && dayNum(x.t) - dayNum(now) < 7).length, avisos: ((DATA && DATA.avisos) || []).length };
+  const counts = { semana: ITEMS.filter((x) => x.kind === 'due' && x.e >= now && !isDone(x) && dayNum(x.t) - dayNum(now) < 7).length, avisos: ((DATA && DATA.avisos) || []).filter((a) => shownCourse(a.course)).length };
   $('tabs').replaceChildren(...TABS.map(([k, l]) => h('button', { class: 'tab' + (ui.tab === k ? ' on' : ''), 'aria-current': ui.tab === k ? 'page' : null,
     onclick: () => { ui.tab = k; if (k === 'asignaturas') ui.course = null; go(); } }, l, counts[k] ? h('span', { class: 'c' }, String(counts[k])) : null)));
-  $('view').replaceChildren(...[(VIEWS[ui.tab] || weekView)()].flat(Infinity).filter(Boolean));
+  $('view').replaceChildren(...[hiddenNote(), (VIEWS[ui.tab] || weekView)()].flat(Infinity).filter(Boolean));
 }
 
 function show(data) {
   DATA = data;
   if (data.program) $('program').textContent = data.program;
-  ITEMS = (data.items || []).filter((x) => KIND[x.kind] && Date.parse(x.start))
+  ALL = (data.items || []).filter((x) => KIND[x.kind] && Date.parse(x.start))
     .map((x) => Object.assign({}, x, { t: Date.parse(x.start), e: Date.parse(x.end || x.start) })).sort((a, b) => a.t - b.t);
-  const names = [...new Set(ITEMS.map((x) => x.course).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
-  COURSES = names.map((name, i) => ({ name, id: (ITEMS.find((x) => x.course === name && /^_\d+_\d+$/.test(x.courseId || '')) || {}).courseId || '', color: `hsl(${Math.round(i * 137.5 + 210) % 360} 65% 55%)` }));
+  const names = [...new Set(ALL.map((x) => x.course).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  COURSES = names.map((name, i) => {
+    const list = ALL.filter((x) => x.course === name);
+    return { name, id: (list.find((x) => /^_\d+_\d+$/.test(x.courseId || '')) || {}).courseId || '', color: `hsl(${Math.round(i * 137.5 + 210) % 360} 65% 55%)`,
+      optional: list.length > 0 && list.every((x) => x.kind === 'opt') };
+  });
   render();
 }
 
@@ -396,6 +446,7 @@ async function load() {
   }
 }
 
+$('mineBtn').addEventListener('click', () => { ui.picker = !ui.picker; render(); });
 const fromHash = () => { const k = location.hash.slice(1); if (VIEWS[k]) ui.tab = k; };
 fromHash();
 addEventListener('hashchange', () => { fromHash(); render(); });
