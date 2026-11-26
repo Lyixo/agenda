@@ -1,17 +1,17 @@
 {
  "version": 1,
- "updated": "2026-11-26T17:21:19.819Z",
+ "updated": "2026-11-26T17:59:49.379Z",
  "by": "el delegado",
  "program": "Máster en Dirección y Organización de Proyectos · Octubre 26",
  "message": "",
  "items": [
   {
    "kind": "class",
-   "course": "Esquema del conocimiento",
-   "courseId": "_101038_1",
-   "title": "Videoconferencia 03 Esquema (no académica)",
-   "start": "2026-11-26T17:30:00.000Z",
-   "end": "2026-11-26T19:00:00.000Z"
+   "course": "Centro de Escritura Nebrija",
+   "courseId": "_73314_1",
+   "title": "Taller de redacción del TFG/TFM del 27 de noviembre",
+   "start": "2026-11-27T14:30:00.000Z",
+   "end": "2026-11-27T17:00:00.000Z"
   },
   {
    "kind": "exam",
@@ -62,15 +62,60 @@
    "task": "https://campusvirtual.nebrija.es/ultra/redirect?redirectType=nautilus&courseId=_101048_1&contentId=_4356154_1"
   },
   {
+   "kind": "class",
+   "course": "Centro de Escritura Nebrija",
+   "courseId": "_73314_1",
+   "title": "Rincón de lectura 11/12/26",
+   "start": "2026-12-11T15:00:00.000Z",
+   "end": "2026-12-12T18:00:00.000Z"
+  },
+  {
    "kind": "opt",
    "course": "Certificación SCRUM 1",
    "courseId": "_113843_1",
    "title": "SCRUM1. Sesion 6",
    "start": "2026-12-14T17:30:00.000Z",
    "end": "2026-12-15T20:00:00.000Z"
+  },
+  {
+   "kind": "class",
+   "course": "Centro de Escritura Nebrija",
+   "courseId": "_73314_1",
+   "title": "Taller de redacción del TFG/TFM del 25 de febrero",
+   "start": "2027-02-25T14:30:00.000Z",
+   "end": "2027-02-25T17:00:00.000Z"
+  },
+  {
+   "kind": "class",
+   "course": "Centro de Escritura Nebrija",
+   "courseId": "_73314_1",
+   "title": "Taller de defensa del TFG/TFM del 26 de febrero",
+   "start": "2027-02-26T14:30:00.000Z",
+   "end": "2027-02-26T17:00:00.000Z"
+  },
+  {
+   "kind": "class",
+   "course": "Centro de Escritura Nebrija",
+   "courseId": "_73314_1",
+   "title": "Taller de APA del 4 de marzo",
+   "start": "2027-03-04T14:30:00.000Z",
+   "end": "2027-03-04T17:00:00.000Z"
+  },
+  {
+   "kind": "class",
+   "course": "Centro de Escritura Nebrija",
+   "courseId": "_73314_1",
+   "title": "Taller de escritura académica del 5 de marzo",
+   "start": "2027-03-05T14:30:00.000Z",
+   "end": "2027-03-05T17:00:00.000Z"
   }
  ],
  "avisos": [
+  {
+   "course": "Centro de Escritura Nebrija",
+   "title": "Rincón de Lectura de diciembre",
+   "date": "2026-11-26T13:48:27.729Z"
+  },
   {
    "course": "Inicio del proyecto",
    "title": "Material complementario de repaso – Project Management II",
