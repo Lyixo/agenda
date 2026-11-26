@@ -92,16 +92,18 @@ pre { margin: 0; font: 12px/1.4 ui-monospace, Menlo, monospace; background: var(
   </section>
 
   <section class="card">
-    <h2>Auf dem iPhone einrichten</h2>
-    <p class="mut">Mit diesem Lesezeichen startest du dein Dashboard im Campus (Safari) und schickst neue Termine hierher.</p>
+    <h2>Auf dem iPhone einrichten (Kurzbefehl)</h2>
+    <p class="mut">Damit startest du dein Dashboard auf der Campus-Seite in Safari: Teilen → <b>Mein Campus</b>.</p>
     <pre id="code"></pre>
     <div class="row"><button type="button" id="copy">Code kopieren</button></div>
     <ol>
-      <li>Hier in Safari auf <b>Teilen</b> → <b>Lesezeichen hinzufügen</b>, Name <b>Mein Campus</b>, sichern.</li>
-      <li>Lesezeichen öffnen (Buch-Symbol) → <b>Bearbeiten</b> → <b>Mein Campus</b> antippen → Adresse löschen und den <b>kopierten Code einfügen</b>.</li>
-      <li><a href="https://campusvirtual.nebrija.es/ultra/institution-page" target="_blank" rel="noopener">campusvirtual.nebrija.es</a> in Safari öffnen und anmelden.</li>
-      <li>In die Adresszeile <b>Mein Campus</b> tippen und das Lesezeichen wählen. Das Dashboard öffnet sich.</li>
-      <li>Unten <b>📣 Für die Klasse</b> → <b>Jetzt veröffentlichen</b> → hier auf <b>Publicar</b> tippen.</li>
+      <li>App <b>Kurzbefehle</b> → <b>+</b> → Name <b>Mein Campus</b>.</li>
+      <li>Aktion <b>„JavaScript für Webseite ausführen“</b> hinzufügen, den Beispiel-Code löschen und den <b>kopierten Code einfügen</b>.</li>
+      <li>Auf das blasse <b>„Webseite“</b> tippen → <b>Kurzbefehleingabe</b> wählen.</li>
+      <li>Einstellungen des Kurzbefehls (ⓘ): <b>Im Share-Sheet anzeigen</b> an, als Eingabe nur <b>Safari-Webseiten</b>.</li>
+      <li>iPhone-Einstellungen → Apps → Kurzbefehle → Erweitert → <b>Ausführen von Skripts erlauben</b>.</li>
+      <li><a href="https://campusvirtual.nebrija.es/ultra/institution-page" target="_blank" rel="noopener">campusvirtual.nebrija.es</a> in Safari öffnen, anmelden, dann <b>Teilen → Mein Campus</b>.</li>
+      <li>Im Dashboard unten <b>📣 Für die Klasse</b> → <b>Jetzt veröffentlichen</b> → hier auf <b>Publicar</b> tippen.</li>
     </ol>
   </section>
 </main>
@@ -119,7 +121,7 @@ try { token = localStorage.getItem(KEY) || ''; } catch (e) {}
 let incoming = null, current = null;
 
 $('repoName').textContent = OWNER + '/' + REPO;
-const LOADER = "javascript:(function(){var s=document.createElement('script');s.src='" + location.origin + '/' + REPO + "/delegado.js?'+Date.now();document.body.appendChild(s)})()";
+const LOADER = "var s=document.createElement('script');s.src='" + location.origin + '/' + REPO + "/delegado.js?'+Date.now();document.body.appendChild(s);completion();";
 $('code').textContent = LOADER;
 $('copy').addEventListener('click', () => {
   navigator.clipboard.writeText(LOADER).then(() => { $('copy').textContent = '✓ Kopiert'; }, () => {
