@@ -1,12 +1,12 @@
 {
  "version": 1,
- "updated": "2026-11-26T17:59:49.379Z",
+ "updated": "2026-11-26T18:03:10.633Z",
  "by": "el delegado",
  "program": "Máster en Dirección y Organización de Proyectos · Octubre 26",
  "message": "",
  "items": [
   {
-   "kind": "class",
+   "kind": "opt",
    "course": "Centro de Escritura Nebrija",
    "courseId": "_73314_1",
    "title": "Taller de redacción del TFG/TFM del 27 de noviembre",
@@ -62,7 +62,7 @@
    "task": "https://campusvirtual.nebrija.es/ultra/redirect?redirectType=nautilus&courseId=_101048_1&contentId=_4356154_1"
   },
   {
-   "kind": "class",
+   "kind": "opt",
    "course": "Centro de Escritura Nebrija",
    "courseId": "_73314_1",
    "title": "Rincón de lectura 11/12/26",
@@ -78,7 +78,7 @@
    "end": "2026-12-15T20:00:00.000Z"
   },
   {
-   "kind": "class",
+   "kind": "opt",
    "course": "Centro de Escritura Nebrija",
    "courseId": "_73314_1",
    "title": "Taller de redacción del TFG/TFM del 25 de febrero",
@@ -86,7 +86,7 @@
    "end": "2027-02-25T17:00:00.000Z"
   },
   {
-   "kind": "class",
+   "kind": "opt",
    "course": "Centro de Escritura Nebrija",
    "courseId": "_73314_1",
    "title": "Taller de defensa del TFG/TFM del 26 de febrero",
@@ -94,7 +94,7 @@
    "end": "2027-02-26T17:00:00.000Z"
   },
   {
-   "kind": "class",
+   "kind": "opt",
    "course": "Centro de Escritura Nebrija",
    "courseId": "_73314_1",
    "title": "Taller de APA del 4 de marzo",
@@ -102,7 +102,7 @@
    "end": "2027-03-04T17:00:00.000Z"
   },
   {
-   "kind": "class",
+   "kind": "opt",
    "course": "Centro de Escritura Nebrija",
    "courseId": "_73314_1",
    "title": "Taller de escritura académica del 5 de marzo",
