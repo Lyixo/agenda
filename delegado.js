@@ -6,7 +6,7 @@
   const HOST_ID = 'nbx-dash-host';
   const existing = document.getElementById(HOST_ID);
   if (existing) { existing.remove(); return; }
-  const BUILD = +'1795712447' || 0;
+  const BUILD = +'1795716051' || 0;
 
   /* Blackboard setzt <base href> auf ein CDN, darum alle Adressen absolut bauen.
      Im Pop-up (about:blank) kommt die Campus-Adresse aus mode. */
@@ -252,7 +252,7 @@
     'Verbinde mit „': 'Conectando con «',
     'Verbinde …': 'Conectando…',
     'Vergangen': 'Pasado',
-    'Version 26.11. 18:00 · Stand ': 'Versión 26.11. 18:00 · actualizado ',
+    'Version 26.11. 19:00 · Stand ': 'Versión 26.11. 19:00 · actualizado ',
     'Video': 'Vídeo',
     'Videokonferenz': 'Videoconferencia',
     'Vorheriger Monat': 'Mes anterior',
@@ -1854,13 +1854,15 @@
     if (s === s.toUpperCase()) s = s.charAt(0) + s.slice(1).toLowerCase();
     return s.replace(/\b(pmp|scrum|tfg|tfm|efqm)\b/gi, (m) => m.toUpperCase());
   };
-  const pubKindOf = (c, title) => (/examen/i.test(title) ? 'exam' : isGeneral(c) ? 'opt' : null);
+  /* Kurse ohne Semester (Centro de Escritura, SCRUM, Coordinación) gehören nicht zum Studienplan: immer „Opcional“,
+     unabhängig davon, auf welchem Gerät und mit welchen ausgeblendeten Kursen veröffentlicht wird. */
+  const pubKindOf = (c, title) => (/examen/i.test(title) ? 'exam' : !c || !c.sem || isGeneral(c) ? 'opt' : null);
   const pubItems = () => {
     const until = now + 16 * 7 * DAY, out = [];
     const ok = (c) => c && !hidden.has(c.id);
     const add = (o) => { if (ok(o.c) && o.start >= now - 3600e3 && o.start < until) out.push(o); };
     for (const d of data.deadlines) add({ key: 'd:' + (d.colId || (d.course ? d.course.id : '') + '|' + d.title) + '|' + d.date, c: d.course, title: d.title, start: d.date, end: null,
-      kind: d.event ? pubKindOf(d.course, d.title) || 'class' : /examen/i.test(d.title) ? 'exam' : 'due',
+      kind: d.event ? pubKindOf(d.course, d.title) || 'class' : /examen/i.test(d.title) ? 'exam' : d.course && !d.course.sem ? 'opt' : 'due',
       /* Direktlink zur Aufgabe: zeigt jedem im Campus den eigenen Abgabestatus. Nur der Link, nichts von deinem Status. */
       task: !d.event && /\/ultra\/redirect\?/.test(d.url || '') ? d.url : '' });
     for (const s of data.live) add({ key: 's:' + s.sid + ':' + s.date, c: s.course, title: s.title, start: s.date, end: s.end === Infinity ? null : s.end, kind: pubKindOf(s.course, s.title) || 'class' });
@@ -2047,7 +2049,7 @@
             courseGroups().map(([label, list]) => h('optgroup', { label }, list.map((c) => h('option', { value: c.id, selected: ui.course === c.id, title: c.name },
               c.short + (hidden.has(c.id) ? ' ' + tr('(ausgeblendet)') : '')))))))),
       searching ? searchView() : (views[ui.tab] || views.week)(),
-      h('footer', {}, h('span', {}, tr('Version 26.11. 18:00 · Stand ') + fmtTime(now) + tr(' · lädt alle 5 Min. neu · Esc schließt')),
+      h('footer', {}, h('span', {}, tr('Version 26.11. 19:00 · Stand ') + fmtTime(now) + tr(' · lädt alle 5 Min. neu · Esc schließt')),
         h('span', { class: 'credit' }, tr('Erstellt von') + ' ', CREATOR.url ? h('a', { href: CREATOR.url, target: '_blank', rel: 'noopener' }, CREATOR.name) : CREATOR.name),
         h('a', { class: 'mail', href: 'https://outlook.office.com/mail/', target: '_blank', rel: 'noopener' }, tr('📧 Uni-Mail')),
         typeof delegadoBtn === 'function' ? delegadoBtn() : null,
